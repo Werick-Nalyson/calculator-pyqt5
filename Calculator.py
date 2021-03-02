@@ -1,5 +1,8 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QGridLayout, QMainWindow, QWidget
+from PyQt5.QtCore import QLine
+from PyQt5.QtWidgets import QApplication, QGridLayout, QMainWindow, QPushButton, QSizePolicy, QWidget
+from PyQt5.QtWidgets import QLineEdit
+from time import sleep
 
 
 class Calculator(QMainWindow):
@@ -9,9 +12,82 @@ class Calculator(QMainWindow):
         self.setFixedSize(400, 400)
         self.cw = QWidget()
         self.grid = QGridLayout(self.cw)
+
+        self.display = QLineEdit()
+        self.display.setDisabled(True)
+        self.display.setStyleSheet('background: #FFF; color: #000; font-size: 30px;')
+        self.display.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+
+        self.grid.addWidget(self.display, 0, 0, 1, 5)
+
+        self.add_btn(QPushButton('7'), 1, 0, 1, 1)
+        self.add_btn(QPushButton('8'), 1, 1, 1, 1)
+        self.add_btn(QPushButton('9'), 1, 2, 1, 1)
+        self.add_btn(QPushButton('+'), 1, 3, 1, 1)
+        self.add_btn(
+            QPushButton('C'), 1, 4, 1, 1, 
+            self.clear_display,
+            'background: #d5580d; color: #fff; font-weight: 700;'
+        )
+
+        self.add_btn(QPushButton('4'), 2, 0, 1, 1)
+        self.add_btn(QPushButton('5'), 2, 1, 1, 1)
+        self.add_btn(QPushButton('6'), 2, 2, 1, 1)
+        self.add_btn(QPushButton('-'), 2, 3, 1, 1)
+        self.add_btn(
+            QPushButton('<-'), 2, 4, 1, 1, 
+            lambda: self.display.setText(
+                self.display.text()[:-1]
+            ),
+            'background: #13823a; color: #fff; font-weight: 700;'
+        )
         
+        self.add_btn(QPushButton('1'), 3, 0, 1, 1)
+        self.add_btn(QPushButton('2'), 3, 1, 1, 1)
+        self.add_btn(QPushButton('3'), 3, 2, 1, 1)
+        self.add_btn(QPushButton('/'), 3, 3, 1, 1)
+        self.add_btn(QPushButton(''), 3, 4, 1, 1)
+
+        self.add_btn(QPushButton('.'), 4, 0, 1, 1)
+        self.add_btn(QPushButton('0'), 4, 1, 1, 1)
+        self.add_btn(QPushButton(''), 4, 2, 1, 1)
+        self.add_btn(QPushButton('*'), 4, 3, 1, 1)
+        self.add_btn(
+            QPushButton('='), 4, 4, 1, 1,
+            self.eval_result,
+            'background: #095177; color: #fff; font-weight: 700;'
+        )
+
 
         self.setCentralWidget(self.cw)
+    
+    def add_btn(self, btn: QPushButton, row, col, rownspan, colspan, function=None, style=None):
+        btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.grid.addWidget(btn, row, col, rownspan, colspan)
+        
+        if not function:
+            btn.clicked.connect(
+                lambda: self.display.setText(
+                    self.display.text() + btn.text()
+                )
+            )
+        else:
+            btn.clicked.connect(function)
+
+        if style:
+            btn.setStyleSheet(style)
+    
+    def eval_result(self):
+        try:
+            self.display.setText(
+                str(eval(self.display.text()))
+            )
+        except Exception as err:
+            self.display.setText('Conta inválida.')
+    
+    def clear_display(self):
+        self.display.setText("")
+
 
 
 if __name__ == "__main__":
